@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args)
     {
-	    // We want to find all .git files on this PC. To prevent issues with scanning network drives, this program
+        // We want to find all .git files on this PC. To prevent issues with scanning network drives, this program
         // will be restricted to just the origin drive for now, although adding drive letter support may be a neat
         // feature.
         long start = System.nanoTime();
@@ -22,6 +22,10 @@ public class Main {
 
         List<String> filesSearched = new ArrayList<>();
 
+        // TODO Can this work be multithreaded? We're bound heavily by I/O, but if we create a pool of something
+        // TODO like 100-1000 threads and have them all eat files from the list, could we see a speedup?
+        // TODO This introduces new complexities with concurrent read, write, and delete, but the gains could be
+        // TODO huge if done right.
         // Now that we have root, work our way through the file system and scan for any .git files
         int repoCount = 0;
         int directoryCount = 0;

@@ -30,7 +30,7 @@ public class Main
         directoriesToSearch.add(root.toFile());
 
         List<FileSearchWorker> workers = new ArrayList<>();
-        int numberOfWorkers = 2000;
+        int numberOfWorkers = 200;
         ExecutorService executor = Executors.newFixedThreadPool(numberOfWorkers);
         for (int i = 0; i<numberOfWorkers; i++)
         {

@@ -6,8 +6,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class Main {
+public class Main
+{
+    public static int repoCount = 0;
+    public static int directoryCount = 0;
+    public static List<String> discoveredRepos = new ArrayList<>();
+    public static List<File> directoriesToSearch = Collections.synchronizedList(new ArrayList<>());
+    public static boolean working = true;
 
     public static void main(String[] args)
     {
@@ -19,50 +27,57 @@ public class Main {
         String workingDirectory = System.getProperty("user.dir");
         Path workingPath = Paths.get(workingDirectory);
         Path root = workingPath.getRoot();
-
-        List<String> filesSearched = new ArrayList<>();
-
-        // TODO Can this work be multithreaded? We're bound heavily by I/O, but if we create a pool of something
-        // TODO like 100-1000 threads and have them all eat files from the list, could we see a speedup?
-        // TODO This introduces new complexities with concurrent read, write, and delete, but the gains could be
-        // TODO huge if done right.
-        // Now that we have root, work our way through the file system and scan for any .git files
-        int repoCount = 0;
-        int directoryCount = 0;
-        List<File> directoriesToSearch = Collections.synchronizedList(new ArrayList<>());
         directoriesToSearch.add(root.toFile());
-        while (!directoriesToSearch.isEmpty())
-        {
-            directoryCount++;
-            File directory = directoriesToSearch.remove(0);
-            filesSearched.add(directory.getAbsolutePath());
-            File[] files = directory.listFiles();
 
-            if (files != null)
+        List<FileSearchWorker> workers = new ArrayList<>();
+        int numberOfWorkers = 2000;
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfWorkers);
+        for (int i = 0; i<numberOfWorkers; i++)
+        {
+            FileSearchWorker worker = new FileSearchWorker(i);
+            workers.add(worker);
+            executor.execute(worker);
+        }
+
+        while (working)
+        {
+            if (directoriesToSearch.size() == 0)
             {
-                for (File file: files)
+                StringBuilder status = new StringBuilder();
+                boolean stillWorking = false;
+                for (FileSearchWorker worker: workers)
                 {
-                    if (file.getName().equals(".git"))
+                    if (worker.isWorking())
                     {
-                        System.out.println("Repo found in: " + file);
-                        repoCount++;
+                        stillWorking = true;
+                        break;
                     }
-                    else if (file.isDirectory())
-                    {
-                        // TODO Consider this optimization. It cuts the run-time in half, but maybe there's a better way?
-                        if (!file.getName().contains("Windows"))
-                        {
-                            directoriesToSearch.add(file);
-                        }
-                    }
+                }
+                working = stillWorking;
+            }
+            else
+            {
+                try
+                {
+                    Thread.sleep(100);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
                 }
             }
         }
 
+        executor.shutdown();
+
         long end = System.nanoTime();
         long run = (end - start) / 1000000;
-        System.out.println("Scanned " + directoryCount + " directories in " + run + "ms");
-        System.out.println("Repos found: " + repoCount);
 
+        System.out.println("Scanned " + directoryCount + " directories in " + run + "ms");
+        for (String repo: discoveredRepos)
+        {
+            System.out.println("Repo exists at " + repo);
+        }
+        System.out.println("Number of repos found - " + repoCount);
     }
 }

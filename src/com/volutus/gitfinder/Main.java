@@ -22,10 +22,6 @@ public class Main {
 
         List<String> filesSearched = new ArrayList<>();
 
-        // TODO Can this work be multithreaded? We're bound heavily by I/O, but if we create a pool of something
-        // TODO like 100-1000 threads and have them all eat files from the list, could we see a speedup?
-        // TODO This introduces new complexities with concurrent read, write, and delete, but the gains could be
-        // TODO huge if done right.
         // Now that we have root, work our way through the file system and scan for any .git files
         int repoCount = 0;
         int directoryCount = 0;

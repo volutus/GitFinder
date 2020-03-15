@@ -4,26 +4,15 @@ import java.io.File;
 
 public class FileSearchWorker implements Runnable
 {
-    public FileSearchWorker(int id)
-    {
-        this.id = id;
-    }
-
     private boolean working = false;
-    private int id;
 
-    public boolean isWorking() {
+    boolean isWorking() {
         return working;
-    }
-    public int getId() {
-        return id;
-    }
-    public void setWorking(boolean working) {
-        this.working = working;
     }
 
     public void run()
     {
+        // This will run constantly until the main thread is done, at which it will resolve nicely.
         while (Main.working)
         {
             // This logic is a joke, but it is the best way I've found to do this. You'll see a LOT of
@@ -41,7 +30,6 @@ public class FileSearchWorker implements Runnable
                     // DO NOTHING
                 }
             }
-
 
             if (directory != null)
             {

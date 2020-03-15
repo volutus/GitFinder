@@ -17,6 +17,11 @@ public class Main
     static List<File> directoriesToSearch = Collections.synchronizedList(new ArrayList<>());
     static boolean working = true;
 
+    // I've found the best performance around 200 on my machine.
+    private static final int NUMBER_OF_WORKERS = 200;
+
+    private static final int POLLING_INTERVAL_IN_MILLIS = 100;
+
     public static void main(String[] args)
     {
         // We want to find all .git files on this PC. To prevent issues with scanning network drives, this program
@@ -30,11 +35,10 @@ public class Main
         directoriesToSearch.add(root.toFile());
 
         List<FileSearchWorker> workers = new ArrayList<>();
-        int numberOfWorkers = 200;
-        ExecutorService executor = Executors.newFixedThreadPool(numberOfWorkers);
-        for (int i = 0; i<numberOfWorkers; i++)
+        ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_WORKERS);
+        for (int i = 0; i<NUMBER_OF_WORKERS; i++)
         {
-            FileSearchWorker worker = new FileSearchWorker(i);
+            FileSearchWorker worker = new FileSearchWorker();
             workers.add(worker);
             executor.execute(worker);
         }
@@ -43,35 +47,39 @@ public class Main
         {
             if (directoriesToSearch.size() == 0)
             {
-                boolean stillWorking = false;
+                boolean workerStillActive = false;
                 for (FileSearchWorker worker: workers)
                 {
                     if (worker.isWorking())
                     {
-                        stillWorking = true;
-                        break;
+                        workerStillActive = true;
+                        break;      // no point to keep searching
                     }
                 }
-                working = stillWorking;
+                working = workerStillActive;
             }
             else
             {
                 try
                 {
-                    Thread.sleep(100);
+                    // We'll use a polling approach to keep checking our workers.
+                    Thread.sleep(POLLING_INTERVAL_IN_MILLIS);
                 }
                 catch (Exception e)
                 {
+                    // This really shouldn't ever happen
                     e.printStackTrace();
                 }
             }
         }
 
+        // Terminate the threads we made
         executor.shutdown();
 
         long end = System.nanoTime();
         long run = (end - start) / 1000000;
 
+        // Now print the results to the console
         System.out.println("Scanned " + directoryCount + " directories in " + run + "ms");
         for (String repo: discoveredRepos)
         {

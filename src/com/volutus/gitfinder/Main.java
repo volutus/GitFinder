@@ -11,11 +11,11 @@ import java.util.concurrent.Executors;
 
 public class Main
 {
-    public static int repoCount = 0;
-    public static int directoryCount = 0;
-    public static List<String> discoveredRepos = new ArrayList<>();
-    public static List<File> directoriesToSearch = Collections.synchronizedList(new ArrayList<>());
-    public static boolean working = true;
+    static int repoCount = 0;
+    static int directoryCount = 0;
+    static List<String> discoveredRepos = new ArrayList<>();
+    static List<File> directoriesToSearch = Collections.synchronizedList(new ArrayList<>());
+    static boolean working = true;
 
     public static void main(String[] args)
     {
@@ -43,7 +43,6 @@ public class Main
         {
             if (directoriesToSearch.size() == 0)
             {
-                StringBuilder status = new StringBuilder();
                 boolean stillWorking = false;
                 for (FileSearchWorker worker: workers)
                 {

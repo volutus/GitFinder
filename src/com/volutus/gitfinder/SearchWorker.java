@@ -6,7 +6,7 @@ public class SearchWorker implements Runnable
 {
     private final SearchDaemon daemon;
     private final Integer id;
-    private boolean working = false;
+
     public SearchWorker(SearchDaemon daemon, Integer id)
     {
         this.daemon = daemon;
@@ -15,21 +15,21 @@ public class SearchWorker implements Runnable
 
 	public void run()
 	{
-        this.working = true;
+        boolean working = true;
 		// This will run constantly until the main thread is done, at which point it will resolve nicely.
-		while (this.working)
+		while (working)
 		{
             File directory = null;
             synchronized (daemon.directoriesToSearch)
             {
-                this.working = !daemon.directoriesToSearch.isEmpty();
-                if (this.working)
+                working = !daemon.directoriesToSearch.isEmpty();
+                if (working)
                 {
                     directory = daemon.directoriesToSearch.removeFirst();
                 }
             }
             this.handleDirectory(directory);
-            if (!this.working)
+            if (!working)
             {
                 synchronized (daemon)
                 {

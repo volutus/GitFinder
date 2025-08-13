@@ -4,7 +4,7 @@ Simple utility to find all Git repos on the local machine.
 It should be Windows and Linux friendly but the path exclusion logic may need some formalization if this usage becomes widespread.
 
 
-```declarative
+```bash
 Scanned 230865 directories in 2187ms
 Repo exists at /home/volutus/IdeaProjects/GitFinder/.git
 ...

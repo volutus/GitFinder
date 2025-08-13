@@ -1,8 +1,6 @@
 <component name="libraryTable">
   <library name="GitFinder">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/out/artifacts/GitFinder_jar/GitFinder.jar!/" />
-    </CLASSES>
+    <CLASSES />
     <JAVADOC />
     <SOURCES />
   </library>
